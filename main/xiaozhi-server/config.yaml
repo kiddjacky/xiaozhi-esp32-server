@@ -512,6 +512,12 @@ TTS:
     access_token: 你的火山引擎语音合成服务access_token
     resource_id: volc.service_type.10029
     speaker: zh_female_wanwanxiaohe_moon_bigtts
+  GeminiDoubleStreamTTS:
+    type: gemini_double_stream
+    gemini_api_key: "YOUR_GEMINI_API_KEY"  # User needs to replace this
+    gemini_tts_model: "gemini-1.5-flash-latest" # Or other compatible model, e.g., a specific TTS fine-tuned one if available
+    gemini_voice_name: "echo" # Default voice, user can change (e.g., other voices if API supports them)
+    output_dir: tmp/ # Consistent with other TTS configs
   CosyVoiceSiliconflow:
     type: siliconflow
     # 硅基流动TTS
