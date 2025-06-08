@@ -159,7 +159,7 @@ end_prompt:
   enable: true # 是否开启结束语
   # 结束语
   prompt: |
-    请你以“时间过得真快”未来头，用富有感情、依依不舍的话来结束这场对话吧！
+    请你以"时间过得真快"未来头，用富有感情、依依不舍的话来结束这场对话吧！
 
 # 具体处理时选择的模块(The module selected for specific processing)
 selected_module:
@@ -168,11 +168,11 @@ selected_module:
   # 语音识别模块，默认使用FunASR本地模型
   ASR: FunASR
   # 将根据配置名称对应的type调用实际的LLM适配器
-  LLM: ChatGLMLLM
+  LLM: OllamaLLM
   # 视觉语言大模型
   VLLM: ChatGLMVLLM
   # TTS将根据配置名称对应的type调用实际的TTS适配器
-  TTS: EdgeTTS
+  TTS: GeminiTTS
   # 记忆模块，默认不开启记忆；如果想使用超长记忆，推荐使用mem0ai；如果注重隐私，请使用本地的mem_local_short
   Memory: nomem
   # 意图识别模块开启后，可以播放音乐、控制音量、识别退出指令。
@@ -196,7 +196,7 @@ Intent:
     # 如果你的不想使用selected_module.LLM意图识别，这里最好使用独立的LLM作为意图识别，例如使用免费的ChatGLMLLM
     llm: ChatGLMLLM
     # plugins_func/functions下的模块，可以通过配置，选择加载哪个模块，加载后对话支持相应的function调用
-    # 系统默认已经记载“handle_exit_intent(退出识别)”、“play_music(音乐播放)”插件，请勿重复加载
+    # 系统默认已经记载"handle_exit_intent(退出识别)"、"play_music(音乐播放)"插件，请勿重复加载
     # 下面是加载查天气、角色切换、加载查新闻的插件示例
     functions:
       - get_weather
@@ -206,7 +206,7 @@ Intent:
     # 不需要动type
     type: function_call
     # plugins_func/functions下的模块，可以通过配置，选择加载哪个模块，加载后对话支持相应的function调用
-    # 系统默认已经记载“handle_exit_intent(退出识别)”、“play_music(音乐播放)”插件，请勿重复加载
+    # 系统默认已经记载"handle_exit_intent(退出识别)"、"play_music(音乐播放)"插件，请勿重复加载
     # 下面是加载查天气、角色切换、加载查新闻的插件示例
     functions:
       - change_role
@@ -400,7 +400,7 @@ LLM:
     # 若在中国境内使用，请遵守《生成式人工智能服务管理暂行办法》
     # token申请地址： https://aistudio.google.com/apikey
     # 若部署地无法访问接口，需要开启科学上网
-    api_key: 你的gemini web key
+    api_key: AIzaSyA5PkEF5n5-hRxKWjidbU7XP3DYzz6aEhM
     model_name: "gemini-2.0-flash"
     http_proxy: ""  #"http://127.0.0.1:10808"
     https_proxy: "" #http://127.0.0.1:10808"
@@ -512,12 +512,13 @@ TTS:
     access_token: 你的火山引擎语音合成服务access_token
     resource_id: volc.service_type.10029
     speaker: zh_female_wanwanxiaohe_moon_bigtts
-  GeminiDoubleStreamTTS:
+  GeminiTTS:
     type: gemini_double_stream
-    gemini_api_key: "YOUR_GEMINI_API_KEY"  # User needs to replace this
-    gemini_tts_model: "gemini-1.5-flash-latest" # Or other compatible model, e.g., a specific TTS fine-tuned one if available
-    gemini_voice_name: "echo" # Default voice, user can change (e.g., other voices if API supports them)
-    output_dir: tmp/ # Consistent with other TTS configs
+    gemini_api_key: "AIzaSyA5PkEF5n5-hRxKWjidbU7XP3DYzz6aEhM"
+    gemini_tts_model: "gemini-2.5-flash-preview-tts"
+    gemini_voice_name: "Kore"  # Available voices: Zephyr, Puck, Charon, Kore, Orus, Autonoe, etc.
+    output_dir: "tmp/"
+    delete_audio: true
   CosyVoiceSiliconflow:
     type: siliconflow
     # 硅基流动TTS
@@ -773,3 +774,10 @@ TTS:
     access_token: "U4YdYXVfpwWnk2t5Gp822zWPCuORyeJL"
     voice: "OUeAo1mhq6IBExi"
     output_dir: tmp/
+  GeminiTTS:
+    type: gemini_double_stream
+    gemini_api_key: "AIzaSyA5PkEF5n5-hRxKWjidbU7XP3DYzz6aEhM"
+    gemini_tts_model: "gemini-2.5-flash-preview-tts"
+    gemini_voice_name: "Kore"  # Available voices: Zephyr, Puck, Charon, Kore, Orus, Autonoe, etc.
+    output_dir: "tmp/"
+    delete_audio: true

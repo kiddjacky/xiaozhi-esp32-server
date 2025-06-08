@@ -62,6 +62,7 @@ class WebSocketServer:
 
     async def _http_response(self, websocket, request_headers):
         # 检查是否为 WebSocket 升级请求
+        # In websockets 14.2, request_headers is a Request object
         if request_headers.headers.get("connection", "").lower() == "upgrade":
             # 如果是 WebSocket 请求，返回 None 允许握手继续
             return None

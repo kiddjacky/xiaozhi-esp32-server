@@ -154,27 +154,57 @@ class ConnectionHandler:
 
     async def handle_connection(self, ws):
         try:
-            # 获取并验证headers
-            self.headers = dict(ws.request.headers)
+            # 获取并验证headers - websockets 14.2 compatibility
+            try:
+                # Try to access headers directly first (websockets 14.2+)
+                self.headers = dict(ws.request_headers)
+            except AttributeError:
+                try:
+                    # Try through request.headers (older versions)
+                    self.headers = dict(ws.request.headers) if hasattr(ws, 'request') and hasattr(ws.request, 'headers') else {}
+                except AttributeError:
+                    # Fallback: try direct headers attribute
+                    if hasattr(ws, 'headers'):
+                        self.headers = dict(ws.headers)
+                    else:
+                        self.logger.bind(tag=TAG).error(f"Unable to access headers from WebSocket object. Available attributes: {dir(ws)}")
+                        # Set empty headers as last resort to prevent crash
+                        self.headers = {}
 
             if self.headers.get("device-id", None) is None:
                 # 尝试从 URL 的查询参数中获取 device-id
                 from urllib.parse import parse_qs, urlparse
 
-                # 从 WebSocket 请求中获取路径
-                request_path = ws.request.path
+                # 从 WebSocket 请求中获取路径 - websockets版本兼容性处理
+                request_path = None
+                try:
+                    # Try to access path directly (newer versions)
+                    request_path = ws.path
+                except AttributeError:
+                    try:
+                        # Try through request.path (older versions)
+                        request_path = ws.request.path if hasattr(ws, 'request') and hasattr(ws.request, 'path') else None
+                    except AttributeError:
+                        # Try through handshake
+                        if hasattr(ws, 'handshake') and hasattr(ws.handshake, 'path'):
+                            request_path = ws.handshake.path
+                        else:
+                            self.logger.bind(tag=TAG).warning("无法获取WebSocket请求路径，跳过URL参数解析")
+                            request_path = None
+                
                 if not request_path:
-                    self.logger.bind(tag=TAG).error("无法获取请求路径")
-                    return
-                parsed_url = urlparse(request_path)
-                query_params = parse_qs(parsed_url.query)
-                if "device-id" in query_params:
-                    self.headers["device-id"] = query_params["device-id"][0]
-                    self.headers["client-id"] = query_params["client-id"][0]
+                    self.logger.bind(tag=TAG).info("未找到请求路径，跳过URL参数中的device-id获取")
+                    # 不直接return，继续执行后续逻辑
                 else:
-                    await ws.send("端口正常，如需测试连接，请使用test_page.html")
-                    await self.close(ws)
-                    return
+                    parsed_url = urlparse(request_path)
+                    query_params = parse_qs(parsed_url.query)
+                    if "device-id" in query_params:
+                        self.headers["device-id"] = query_params["device-id"][0]
+                        self.headers["client-id"] = query_params["client-id"][0]
+                    else:
+                        await ws.send("端口正常，如需测试连接，请使用test_page.html")
+                        await self.close(ws)
+                        return
             # 获取客户端ip地址
             self.client_ip = ws.remote_address[0]
             self.logger.bind(tag=TAG).info(
